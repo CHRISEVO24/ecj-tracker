@@ -195,6 +195,7 @@ async function main() {
       stockStatus,
       image,
       permalink,
+      url: permalink,
       year,
     };
   }
