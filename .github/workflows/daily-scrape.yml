@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -22,12 +24,12 @@ jobs:
 
       - name: Download latest history.json from releases
         run: |
-          ASSET_URL=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          ASSET_URL=$(curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
             https://api.github.com/repos/${{ github.repository }}/releases/latest \
             | python3 -c "import sys,json; d=json.load(sys.stdin); assets=d.get('assets',[]); match=next((a['url'] for a in assets if a['name']=='history.json'),''); print(match)")
           if [ -n "$ASSET_URL" ]; then
-            curl -s -L -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            curl -s -L -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
               -H "Accept: application/octet-stream" "$ASSET_URL" -o history.json \
               && echo "Downloaded history.json ($(du -sh history.json | cut -f1))"
           else
@@ -52,13 +54,13 @@ jobs:
         run: |
           TSTAMP=$(TZ='America/New_York' date '+%Y-%m-%d-%H%M')
           RELEASE_ID=$(curl -s -X POST \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
             -H "Content-Type: application/json" \
             https://api.github.com/repos/${{ github.repository }}/releases \
             -d "{\"tag_name\":\"snapshot-${TSTAMP}\",\"name\":\"Snapshot ${TSTAMP} ET\",\"body\":\"Automated snapshot\"}" \
             | python3 -c "import sys,json; print(json.load(sys.stdin).get('id',''))")
           curl -s -X POST \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
             -H "Content-Type: application/json" \
             --data-binary @history.json \
             "https://uploads.github.com/repos/${{ github.repository }}/releases/${RELEASE_ID}/assets?name=history.json"
@@ -74,4 +76,4 @@ jobs:
           git rebase origin/main
           git push
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
