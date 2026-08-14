@@ -118,7 +118,7 @@ async function main() {
     const salePrice = p.prices?.sale_price && p.prices.sale_price !== p.prices.regular_price
       ? formatPrice(p.prices.sale_price) : '';
     const image = p.images?.[0]?.src || '';
-    const stockStatus = p.stock_status === 'instock' ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock';
+    const stockStatus = p.is_in_stock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock';
 
     // Check cache for detail attributes
     let detail = {};
