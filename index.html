@@ -449,17 +449,18 @@ async function autoLoadHistory() {
   try {
     // Fetch history.json from GitHub Releases
     const REPO = 'CHRISEVO24/ecj-tracker';
+    // Get latest release tag then build direct download URL
     const relRes = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`, {
       headers: { 'Accept': 'application/vnd.github.v3+json' }
     });
-    if (!relRes.ok) throw new Error(`GitHub Releases API error (${relRes.status})`);
+    if (!relRes.ok) throw new Error(`Releases API error (${relRes.status})`);
     const relData = await relRes.json();
-    const asset = (relData.assets || []).find(a => a.name === 'history.json');
-    if (!asset) throw new Error('history.json not found in latest release');
+    if (!relData.tag_name) throw new Error('No releases found yet');
 
-    // Download using the asset download URL
-    const dlRes = await fetch(asset.browser_download_url);
-    if (!dlRes.ok) throw new Error(`Download failed (${dlRes.status})`);
+    // Direct download URL works for public repos without auth
+    const directUrl = `https://github.com/${REPO}/releases/download/${relData.tag_name}/history.json`;
+    const dlRes = await fetch(directUrl);
+    if (!dlRes.ok) throw new Error(`Download failed (${dlRes.status}). Run the workflow first.`);
     HISTORY = await dlRes.json();
 
     // Also try to load attribute-cache.json from repo
