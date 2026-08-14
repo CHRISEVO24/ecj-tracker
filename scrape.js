@@ -86,7 +86,7 @@ function mapFields(raw) {
     'boxPapers':           ['Box/Papers','Box & Papers','Box and Papers','Papers','Box','Includes'],
     'serialInfo':          ['Serial Info','Serial Number','Serial','Year','Year/Box/Papers'],
     'year':                ['Year','Year of Purchase','Production Year'],
-    'description':         ['Additional details','Additional Details','Notes','Condition','Description'],
+    'description':         ['Additional details','Additional Details','Notes','Condition','Description','Condition/Details','Item Details'],
   };
   const out = {};
   for (const [std, variants] of Object.entries(fieldMap)) {
@@ -177,7 +177,7 @@ async function main() {
       sku,
       name:            p.name,
       brand,
-      referenceNumber: detail['Reference Number'] || rawDetail['Reference Number'] || rawDetail['Reference #'] || '',
+      referenceNumber: detail['Reference Number'] || rawDetail['Reference Number'] || rawDetail['Reference #'] || rawDetail['Ref#'] || rawDetail['Reference'] || '',
       movement:        detail.movement   || '',
       caseSize:        detail.caseSize   || '',
       caseMaterial:    detail.caseMaterial || '',
@@ -186,7 +186,7 @@ async function main() {
       bandMaterial:    detail.bandMaterial || '',
       boxPapers:       detail.boxPapers    || '',
       serialInfo:      detail.serialInfo   || '',
-      description:     detail.description  || '',
+      description:     detail.description  || rawDetail['Additional details'] || rawDetail['Condition'] || rawDetail['Notes'] || '',
       categories:      categories.join(', '),
       price,
       regularPrice:    formatPrice(p.prices?.regular_price || '0'),
@@ -201,7 +201,15 @@ async function main() {
 
   console.log(`From cache: ${fromCache} | Newly fetched: ${newCount} | Empty: ${emptyCache}`);
 
-  const timestamp = new Date().toISOString();
+  // Use WPB-compatible timestamp format: "YYYY-MM-DD HH:MM ET"
+  const now = new Date();
+  const etStr = now.toLocaleString('en-US', {timeZone:'America/New_York',
+    year:'numeric', month:'2-digit', day:'2-digit',
+    hour:'2-digit', minute:'2-digit', hour12:false}).replace(',','');
+  // Convert "MM/DD/YYYY HH:MM" to "YYYY-MM-DD HH:MM"
+  const [datePart, timePart] = etStr.split(' ');
+  const [mo, da, yr] = datePart.split('/');
+  const timestamp = `${yr}-${mo}-${da} ${timePart} ET`;
   history[timestamp] = snapshot;
 
   // Keep last 500 snapshots
