@@ -497,6 +497,21 @@ function init() {
   KEYS = Object.keys(HISTORY).sort();
   LATEST_SNAP = HISTORY[KEYS[KEYS.length - 1]] || {};
 
+  // Normalize stock status from schema.org URLs to readable strings
+  Object.values(LATEST_SNAP).forEach(w => {
+    if (w.stockStatus && w.stockStatus.includes('schema.org')) {
+      w.stockStatus = w.stockStatus.includes('InStock') ? 'In Stock' : 'Out of Stock';
+    }
+    // Also normalize all historical snapshots for changes tab
+  });
+  Object.keys(HISTORY).forEach(k => {
+    Object.values(HISTORY[k]).forEach(w => {
+      if (w.stockStatus && w.stockStatus.includes('schema.org')) {
+        w.stockStatus = w.stockStatus.includes('InStock') ? 'In Stock' : 'Out of Stock';
+      }
+    });
+  });
+
   // Stats
   document.getElementById("stat-snaps").textContent    = KEYS.length;
   document.getElementById("stat-snaps-sub").textContent = KEYS.length > 1
