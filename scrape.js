@@ -202,8 +202,8 @@ async function main() {
   console.log(`From cache: ${fromCache} | Newly fetched: ${newCount} | Empty: ${emptyCache}`);
 
   // Use WPB-compatible timestamp format: "YYYY-MM-DD HH:MM ET"
-  const now = new Date();
-  const etStr = now.toLocaleString('en-US', {timeZone:'America/New_York',
+  const nowEt = new Date();
+  const etStr = nowEt.toLocaleString('en-US', {timeZone:'America/New_York',
     year:'numeric', month:'2-digit', day:'2-digit',
     hour:'2-digit', minute:'2-digit', hour12:false}).replace(',','');
   // Convert "MM/DD/YYYY HH:MM" to "YYYY-MM-DD HH:MM"
