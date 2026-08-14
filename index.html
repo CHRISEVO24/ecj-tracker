@@ -1033,7 +1033,7 @@ function refreshTable() {
       <td class="td-price">${x(w.price)}</td>
       <td style="font-size:13px;color:var(--text);font-weight:600;">${x(w.year || "—")}</td>
       <td class="td-cat">${x(w.categories)}</td>
-      <td class="td-desc" title="${x(w.description)}">${x(w.description)}</td>
+      <td class="td-desc" title="${x(w.description||w.name)}">${x(w.description||w.name)}</td>
       <td class="td-link"><a href="${w.url}" target="_blank">View →</a></td>
     </tr>`;
   }).join("");
@@ -1311,7 +1311,7 @@ function card(w, type) {
   return `<div class="watch-card">
     <div class="card-top"><div class="card-name">${x(w.name)}</div><div class="card-price">${x(w.price)}</div></div>
     <div class="card-meta">${w.sku?`<span class="card-sku">${x(w.sku)}</span>`:""}${w.categories?`<span class="card-cat">${x(w.categories)}</span>`:""}</div>
-    ${w.description?`<div class="card-desc">${x(w.description)}</div>`:""}
+    ${(w.description||w.name)?`<div class="card-desc">${x(w.description||w.name)}</div>`:""}
     <div class="card-footer">${badge}${link}</div>
   </div>`;
 }
