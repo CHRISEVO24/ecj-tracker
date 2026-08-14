@@ -543,10 +543,14 @@ function renderInventory(products) {
   colFilters = {}; ddFilters = {};
   sortCol = "name"; sortDir = "asc";
   populateDropdowns(products);
-  // Default to In Stock only
-  const stockEl = document.getElementById("dd-stockStatus");
-  if (stockEl && !stockEl.value) { stockEl.value = "In Stock"; }
-  ddFilters["stockStatus"] = document.getElementById("dd-stockStatus")?.value || "In Stock";
+  // Default to In Stock
+  const stockEl = document.getElementById("dd-stock");
+  if (stockEl) {
+    // Find "In Stock" option
+    const opt = Array.from(stockEl.options).find(o => o.value === "In Stock");
+    if (opt) stockEl.value = "In Stock";
+  }
+  ddFilters["stockStatus"] = "In Stock";
   applyFiltersAndSort(products);
   selected.clear();
   updateSelCount();
@@ -1316,18 +1320,26 @@ function card(w, type) {
 // ── helpers ───────────────────────────────────────────────────────────────────
 function fmtKey(k) {
   if (!k) return "—";
-  if (k.includes("T")) {
-    const dt = new Date(k);
-    return dt.toLocaleString("en-US", {timeZone:"America/New_York", month:"short", day:"numeric", hour:"numeric", minute:"2-digit", hour12:true});
-  }
-  const parts = k.replace(" ET","").split(" ");
-  const dp = parts[0]; const tp = parts[1] || "00:00";
-  const [y,m,d] = dp.split("-").map(Number);
-  const [hh,mm] = tp.split(":").map(Number);
-  if (!m || !d || isNaN(hh)) return k;
-  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  const ampm = hh>=12?"PM":"AM", h12 = hh%12||12;
-  return `${months[m-1]} ${d}  ·  ${h12}:${String(mm).padStart(2,"0")} ${ampm}`;
+  try {
+    // Handle "YYYY-MM-DD HH:MM ET" format
+    const clean = k.replace(" ET","").trim();
+    const spaceIdx = clean.indexOf(" ");
+    const dp = spaceIdx > -1 ? clean.substring(0, spaceIdx) : clean;
+    const tp = spaceIdx > -1 ? clean.substring(spaceIdx+1) : "00:00";
+    const dparts = dp.split("-");
+    const tparts = tp.split(":");
+    const y=parseInt(dparts[0]), m=parseInt(dparts[1]), d=parseInt(dparts[2]);
+    const hh=parseInt(tparts[0]), mm=parseInt(tparts[1]||"0");
+    if (isNaN(m)||isNaN(d)||isNaN(hh)) {
+      // Fallback: try Date parse
+      const dt = new Date(k);
+      if (!isNaN(dt)) return dt.toLocaleString("en-US",{timeZone:"America/New_York",month:"short",day:"numeric",hour:"numeric",minute:"2-digit",hour12:true});
+      return k;
+    }
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const ampm = hh>=12?"PM":"AM", h12 = hh%12||12;
+    return `${months[m-1]} ${d}  ·  ${h12}:${String(mm).padStart(2,"0")} ${ampm}`;
+  } catch(e) { return k; }
 }
 function x(s="") { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
