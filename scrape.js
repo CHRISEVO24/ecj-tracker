@@ -141,10 +141,9 @@ async function main() {
     const priceRaw  = p.prices?.price || p.prices?.regular_price || '0';
     const price     = formatPrice(priceRaw);
 
-    // Stock status — convert schema.org URL to readable
-    const rawStock  = p.stock_status || '';
-    const inStock   = rawStock === 'instock' || rawStock.includes('InStock');
-    const stockStatus = inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock';
+    // Stock status — use is_in_stock boolean (most reliable field)
+    const inStock = p.is_in_stock === true || p.stock_status === 'instock';
+    const stockStatus = inStock ? 'In Stock' : 'Out of Stock';
 
     const image     = p.images?.[0]?.src || '';
     const permalink = p.permalink || '';
