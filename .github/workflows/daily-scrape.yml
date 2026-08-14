@@ -72,6 +72,8 @@ jobs:
           git config --global user.email "scraper@ecjluxe.com"
           git add history.json attribute-cache.json 2>/dev/null || true
           git diff --staged --quiet || git commit -m "Auto update [skip ci] - $(TZ='America/New_York' date '+%Y-%m-%d %I:%M %p ET')"
-          git push --force-with-lease
+          git fetch origin main
+          git rebase origin/main
+          git push
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
