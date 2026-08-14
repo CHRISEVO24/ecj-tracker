@@ -447,25 +447,12 @@ let ATTR_CACHE = {}; // loaded from attribute-cache.json for FB export enrichmen
 
 async function autoLoadHistory() {
   try {
-    // Fetch history.json from GitHub Releases
-    const REPO = 'CHRISEVO24/ecj-tracker';
-    // Get latest release tag then build direct download URL
-    const relRes = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`, {
-      headers: { 'Accept': 'application/vnd.github.v3+json' }
-    });
-    if (!relRes.ok) throw new Error(`Releases API error (${relRes.status})`);
-    const relData = await relRes.json();
-    if (!relData.tag_name) throw new Error('No releases found yet');
+    const res = await fetch("./history.json?t=" + Date.now());
+    if (!res.ok) throw new Error(`history.json not found (${res.status})`);
+    HISTORY = await res.json();
 
-    // Direct download URL works for public repos without auth
-    const directUrl = `https://github.com/${REPO}/releases/download/${relData.tag_name}/history.json`;
-    const dlRes = await fetch(directUrl);
-    if (!dlRes.ok) throw new Error(`Download failed (${dlRes.status}). Run the workflow first.`);
-    HISTORY = await dlRes.json();
-
-    // Also try to load attribute-cache.json from repo
     try {
-      const cacheRes = await fetch(`https://raw.githubusercontent.com/${REPO}/main/attribute-cache.json?t=${Date.now()}`);
+      const cacheRes = await fetch("./attribute-cache.json?t=" + Date.now());
       if (cacheRes.ok) {
         ATTR_CACHE = await cacheRes.json();
         console.log("Attribute cache loaded:", Object.keys(ATTR_CACHE).length, "products");
