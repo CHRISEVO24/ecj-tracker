@@ -186,7 +186,7 @@ async function main() {
       bandMaterial:    detail.bandMaterial || '',
       boxPapers:       detail.boxPapers    || '',
       serialInfo:      detail.serialInfo   || '',
-      description:     detail.description  || rawDetail['Additional details'] || rawDetail['Condition'] || rawDetail['Notes'] || '',
+      description:     detail.description  || rawDetail['Additional details'] || rawDetail['Condition'] || rawDetail['Notes'] || p.name || '',
       categories:      categories.join(', '),
       price,
       regularPrice:    formatPrice(p.prices?.regular_price || '0'),
