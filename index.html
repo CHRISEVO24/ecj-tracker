@@ -519,6 +519,11 @@ function init() {
 
   // Inventory tab
   renderInventory(Object.values(LATEST_SNAP));
+  // Default stock filter to In Stock
+  setTimeout(() => {
+    const stockDd = document.getElementById("dd-stockStatus");
+    if (stockDd) { stockDd.value = "In Stock"; stockDd.dispatchEvent(new Event("change")); }
+  }, 50);
 
   // Changes tab selects
   populateSelects();
@@ -1311,7 +1316,10 @@ function card(w, type) {
 // ── helpers ───────────────────────────────────────────────────────────────────
 function fmtKey(k) {
   if (!k) return "—";
-  const [dp, tp] = k.split(" ");
+  // Handle "YYYY-MM-DD HH:MM ET" format
+  const parts = k.split(" ");
+  const dp = parts[0];
+  const tp = parts[1] || "00:00";
   const [y,m,d]  = dp.split("-").map(Number);
   const [hh,mm]  = tp.split(":").map(Number);
   const months   = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
