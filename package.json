@@ -1,0 +1,1 @@
+{"name":"ecj-tracker","version":"1.0.0","description":"ECJ Luxe Collection Inventory Tracker","scripts":{"scrape":"node scrape.js"},"dependencies":{}}
