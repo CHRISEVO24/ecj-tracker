@@ -202,14 +202,17 @@ async function main() {
   console.log(`From cache: ${fromCache} | Newly fetched: ${newCount} | Empty: ${emptyCache}`);
 
   // Use WPB-compatible timestamp format: "YYYY-MM-DD HH:MM ET"
-  const nowEt = new Date();
-  const etStr = nowEt.toLocaleString('en-US', {timeZone:'America/New_York',
-    year:'numeric', month:'2-digit', day:'2-digit',
-    hour:'2-digit', minute:'2-digit', hour12:false}).replace(',','');
-  // Convert "MM/DD/YYYY HH:MM" to "YYYY-MM-DD HH:MM"
-  const [datePart, timePart] = etStr.split(' ');
-  const [mo, da, yr] = datePart.split('/');
-  const timestamp = `${yr}-${mo}-${da} ${timePart} ET`;
+  // ET = UTC-4 (EDT) or UTC-5 (EST) — use fixed -4 offset for summer
+  const nowUtc = new Date();
+  const etOffsetMs = -4 * 60 * 60 * 1000; // EDT (UTC-4)
+  const nowEtMs = nowUtc.getTime() + etOffsetMs;
+  const etDate = new Date(nowEtMs);
+  const yr  = etDate.getUTCFullYear();
+  const mo  = String(etDate.getUTCMonth()+1).padStart(2,'0');
+  const da  = String(etDate.getUTCDate()).padStart(2,'0');
+  const hh  = String(etDate.getUTCHours()).padStart(2,'0');
+  const mm  = String(etDate.getUTCMinutes()).padStart(2,'0');
+  const timestamp = `${yr}-${mo}-${da} ${hh}:${mm} ET`;
   history[timestamp] = snapshot;
 
   // Keep last 500 snapshots
