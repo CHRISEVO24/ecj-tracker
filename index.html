@@ -546,11 +546,10 @@ function renderInventory(products) {
   // Default to In Stock
   const stockEl = document.getElementById("dd-stock");
   if (stockEl) {
-    // Find "In Stock" option
     const opt = Array.from(stockEl.options).find(o => o.value === "In Stock");
     if (opt) stockEl.value = "In Stock";
   }
-  ddFilters["stockStatus"] = "In Stock";
+  ddFilters["stock"] = "In Stock";
   applyFiltersAndSort(products);
   selected.clear();
   updateSelCount();
