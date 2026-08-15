@@ -70,6 +70,33 @@ jobs:
         run: |
           git config --global user.name "ECJ Scraper Bot"
           git config --global user.email "scraper@ecjluxe.com"
+          # Clean ISO keys from history.json before committing
+          python3 -c "
+import json, base64
+from datetime import datetime, timezone, timedelta
+try:
+    h = json.load(open('history.json'))
+    def fix_key(k):
+        if 'T' in k and 'ET' not in k:
+            dt = datetime.fromisoformat(k.replace('Z','+00:00'))
+            return (dt - timedelta(hours=4)).strftime('%Y-%m-%d %H:%M ET')
+        return k
+    clean = {}
+    for k in sorted(h.keys()):
+        nk = fix_key(k)
+        snap = h[k]
+        for sku, item in snap.items():
+            if not item.get('url') and item.get('permalink'):
+                item['url'] = item['permalink']
+            if not item.get('description') and item.get('name'):
+                item['description'] = item['name']
+        if nk not in clean:
+            clean[nk] = snap
+    json.dump(clean, open('history.json','w'))
+    print(f'Cleaned history: {len(h)} -> {len(clean)} keys')
+except Exception as e:
+    print(f'Clean skipped: {e}')
+"
           git add history.json attribute-cache.json 2>/dev/null || true
           git diff --staged --quiet || git commit -m "Auto update [skip ci] - $(TZ='America/New_York' date '+%Y-%m-%d %I:%M %p ET')"
           git fetch origin main
