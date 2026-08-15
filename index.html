@@ -1161,7 +1161,11 @@ function priceAsInt(priceStr) {
 }
 
 async function exportToFacebook() {
-  const items = [...selected].map(id => LATEST_SNAP[id] || Object.values(HISTORY).reduce((found, snap) => found || snap[id], null)).filter(Boolean);
+  // selected stores numeric IDs; LATEST_SNAP is keyed by SKU string
+  const items = [...selected].map(id => {
+    return LATEST_SNAP[id] || LATEST_SNAP[String(id)] ||
+      Object.values(LATEST_SNAP).find(w => w.id === id || w.id === Number(id) || String(w.id) === String(id));
+  }).filter(Boolean);
   if (!items.length) return;
 
   // We'll build the XLSX using the SheetJS approach via a simple script tag
@@ -1198,7 +1202,7 @@ async function exportToFacebook() {
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement("a");
   a.href     = url;
-  a.download = "wpb_facebook_marketplace_" + new Date().toISOString().slice(0,10) + ".csv";
+  a.download = "ecj_facebook_marketplace_" + new Date().toISOString().slice(0,10) + ".csv";
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
