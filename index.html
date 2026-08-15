@@ -747,7 +747,10 @@ document.querySelectorAll(".pc-qb").forEach(btn => {
   });
 });
 
-document.getElementById("pc-run-btn").addEventListener("click", pcRunReport);
+document.getElementById("pc-run-btn").addEventListener("click", () => {
+  document.getElementById("pc-run-btn").textContent = "Loading…";
+  setTimeout(() => { pcRunReport(); document.getElementById("pc-run-btn").textContent = "Run Report"; }, 10);
+});
 
 function pcParsePrice(p) {
   return parseFloat((p || "0").replace(/[^0-9.]/g, "")) || 0;
@@ -1272,12 +1275,15 @@ function runReport() {
   if (!HISTORY) return;
   const fromKey = document.getElementById("sel-from").value;
   const toKey   = document.getElementById("sel-to").value;
+  if (!fromKey || !toKey) return;
+  document.getElementById("run-btn").textContent = "Loading…";
   const fromSnap = HISTORY[fromKey] || {};
   const toSnap   = HISTORY[toKey]   || {};
-  const fromIds  = new Set(Object.keys(fromSnap).map(Number));
-  const toIds    = new Set(Object.keys(toSnap).map(Number));
-  lastAdded = [...toIds].filter(id => !fromIds.has(id)).map(id => toSnap[id]);
-  lastSold  = [...fromIds].filter(id => !toIds.has(id)).map(id => fromSnap[id]);
+  const fromIds  = new Set(Object.keys(fromSnap));
+  const toIds    = new Set(Object.keys(toSnap));
+  lastAdded = [...toIds].filter(id => !fromIds.has(id)).map(id => toSnap[id]).filter(Boolean);
+  lastSold  = [...fromIds].filter(id => !toIds.has(id)).map(id => fromSnap[id]).filter(Boolean);
+  document.getElementById("run-btn").textContent = "Run Report";
   document.getElementById("stat-added").textContent    = lastAdded.length;
   document.getElementById("stat-added-sub").textContent = "between selected snapshots";
   document.getElementById("stat-sold").textContent     = lastSold.length;
