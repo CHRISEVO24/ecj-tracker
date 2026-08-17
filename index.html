@@ -1279,16 +1279,42 @@ function runReport() {
   document.getElementById("run-btn").textContent = "Loading…";
   const fromSnap = HISTORY[fromKey] || {};
   const toSnap   = HISTORY[toKey]   || {};
-  const fromIds  = new Set(Object.keys(fromSnap));
-  const toIds    = new Set(Object.keys(toSnap));
-  lastAdded = [...toIds].filter(id => !fromIds.has(id)).map(id => toSnap[id]).filter(Boolean);
-  lastSold  = [...fromIds].filter(id => !toIds.has(id)).map(id => fromSnap[id]).filter(Boolean);
+  const allSkus = new Set([...Object.keys(fromSnap), ...Object.keys(toSnap)]);
+  const isInStock = w => w && (w.stockStatus === "In Stock" || w.stockStatus === "instock");
+
+  // New arrivals: not in from-snap OR changed to In Stock
+  lastAdded = [];
+  // Sold/removed: was In Stock in from, now Out of Stock or missing in to
+  lastSold  = [];
+
+  allSkus.forEach(sku => {
+    const fItem = fromSnap[sku];
+    const tItem = toSnap[sku];
+    if (!fItem && tItem && isInStock(tItem)) {
+      // Brand new item
+      lastAdded.push(tItem);
+    } else if (fItem && !tItem && isInStock(fItem)) {
+      // Removed entirely
+      lastSold.push(fItem);
+    } else if (fItem && tItem) {
+      if (!isInStock(fItem) && isInStock(tItem)) {
+        // Back in stock
+        lastAdded.push(tItem);
+      } else if (isInStock(fItem) && !isInStock(tItem)) {
+        // Sold / went out of stock
+        lastSold.push(fItem);
+      }
+    }
+  });
+
   document.getElementById("run-btn").textContent = "Run Report";
   document.getElementById("stat-added").textContent    = lastAdded.length;
   document.getElementById("stat-added-sub").textContent = "between selected snapshots";
   document.getElementById("stat-sold").textContent     = lastSold.length;
   document.getElementById("stat-sold-sub").textContent  = "between selected snapshots";
-  document.getElementById("stat-total").textContent    = toIds.size;
+  // Count only In Stock items in to-snapshot
+  const inStockNow = Object.values(toSnap).filter(isInStock).length;
+  document.getElementById("stat-total").textContent    = inStockNow;
   document.getElementById("stat-total-sub").textContent = "as of " + fmtKey(toKey);
   applySearch();
 }
