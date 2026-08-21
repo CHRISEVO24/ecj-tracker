@@ -109,15 +109,15 @@ async function main() {
   }
   console.log('Cache     :', Object.keys(cache).length, 'products cached');
 
-  // Track existing SKUs to detect new items
-  const existingSkus = new Set();
-  Object.values(history).forEach(snap => Object.keys(snap).forEach(k => existingSkus.add(k)));
-  console.log('Existing SKUs:', existingSkus.size);
-
   let history = {};
   if (fs.existsSync(HISTORY_FILE)) {
     try { history = JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8')); } catch(e) {}
   }
+
+  // Track existing SKUs to detect new items (must be after history is loaded)
+  const existingSkus = new Set();
+  Object.values(history).forEach(snap => Object.keys(snap).forEach(k => existingSkus.add(k)));
+  console.log('Existing SKUs:', existingSkus.size);
 
   // Fetch all products
   const { products: firstPage, total } = await fetchPage(1);
