@@ -3,6 +3,7 @@
 
 const https   = require('https');
 const fs      = require('fs');
+const { createDraft } = require('./createWcDraft');
 
 const BASE_URL     = 'https://ecjluxe.com';
 const CAT_ID       = 11774;
@@ -108,6 +109,11 @@ async function main() {
   }
   console.log('Cache     :', Object.keys(cache).length, 'products cached');
 
+  // Track existing SKUs to detect new items
+  const existingSkus = new Set();
+  Object.values(history).forEach(snap => Object.keys(snap).forEach(k => existingSkus.add(k)));
+  console.log('Existing SKUs:', existingSkus.size);
+
   let history = {};
   if (fs.existsSync(HISTORY_FILE)) {
     try { history = JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8')); } catch(e) {}
@@ -201,6 +207,17 @@ async function main() {
   }
 
   console.log(`From cache: ${fromCache} | Newly fetched: ${newCount} | Empty: ${emptyCache}`);
+
+  // Detect new items and create WooCommerce drafts
+  const newItems = Object.values(snapshot).filter(item => !existingSkus.has(item.sku));
+  if (newItems.length > 0) {
+    console.log(`\n🆕 ${newItems.length} new item(s) detected — creating WPB drafts...`);
+    for (const item of newItems) {
+      await createDraft(item, 'ECJ Luxe Collection');
+    }
+  } else {
+    console.log('No new items detected since last scrape.');
+  }
 
   // Use WPB-compatible timestamp format: "YYYY-MM-DD HH:MM ET"
   // ET = UTC-4 (EDT) or UTC-5 (EST) — use fixed -4 offset for summer
