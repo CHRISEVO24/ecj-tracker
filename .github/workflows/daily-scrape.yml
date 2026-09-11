@@ -46,6 +46,8 @@ jobs:
           git fetch origin main
           git checkout -- .
           git clean -fd
+          git checkout -- .
+          git clean -fd
           git rebase origin/main
           git push
         env:
