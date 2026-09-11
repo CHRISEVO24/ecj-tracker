@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -49,6 +51,5 @@ jobs:
           git checkout -- .
           git clean -fd
           git rebase origin/main
+          git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}
           git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
