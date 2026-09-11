@@ -235,7 +235,7 @@ async function main() {
 
   // Keep last 500 snapshots
   const keys = Object.keys(history).sort();
-  if (keys.length > 500) keys.slice(0, keys.length - 500).forEach(k => delete history[k]);
+  if (keys.length > 20) keys.slice(0, keys.length - 500).forEach(k => delete history[k]);
 
   fs.writeFileSync(HISTORY_FILE, JSON.stringify(history));
   fs.writeFileSync(CACHE_FILE, JSON.stringify(cache, null, 2));
