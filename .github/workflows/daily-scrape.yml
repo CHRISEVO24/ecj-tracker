@@ -39,12 +39,16 @@ jobs:
             fi
           done
 
-      - name: Commit files to repo
+      - name: Push history.json via API
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: python3 push_history.py
+
+      - name: Commit other files via git
         run: |
           git config --global user.name "ECJ Scraper Bot"
           git config --global user.email "scraper@wpbwatchco.com"
-          git update-index --no-assume-unchanged history.json 2>/dev/null || true
-          git add -f history.json latest.json 2>/dev/null || true
+          git add attribute-cache.json latest.json 2>/dev/null || true
           git diff --staged --quiet || git commit -m "Auto update [skip ci] - $(TZ='America/New_York' date '+%Y-%m-%d %I:%M %p ET')"
           git fetch origin main
           git checkout -- .
