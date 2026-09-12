@@ -41,21 +41,13 @@ jobs:
 
       - name: Commit files to repo
         run: |
-          echo "=== history.json status ==="
-          git status history.json
-          echo "=== last key in history.json ==="
-          python3 -c "import json; h=json.load(open('history.json')); keys=sorted(h.keys()); print(f'Keys: {len(keys)}, latest: {keys[-1]}')"
-          echo "=== git diff ==="
-          git diff history.json | head -5
           git config --global user.name "ECJ Scraper Bot"
           git config --global user.email "scraper@wpbwatchco.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}
           git add history.json latest.json 2>/dev/null || true
-          git diff --cached --name-only
-          git commit -m "Auto update [skip ci] - $(TZ='America/New_York' date '+%Y-%m-%d %I:%M %p ET')" || echo "Nothing to commit"
+          git diff --staged --quiet || git commit -m "Auto update [skip ci] - $(TZ='America/New_York' date '+%Y-%m-%d %I:%M %p ET')"
           git fetch origin main
           git checkout -- .
           git clean -fd
           git rebase origin/main
           git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
