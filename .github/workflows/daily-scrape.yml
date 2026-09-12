@@ -44,10 +44,18 @@ jobs:
           git config --global user.name "ECJ Scraper Bot"
           git config --global user.email "scraper@wpbwatchco.com"
           git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}
+          echo "=== history.json keys after scrape ==="
+          python3 -c "import json; h=json.load(open('history.json')); keys=sorted(h.keys()); print(f'Keys: {len(keys)}, latest: {keys[-1]}')"
+          echo "=== git status ==="
+          git status
+          echo "=== git diff stat ==="
+          git diff --stat
           git add history.json latest.json 2>/dev/null || true
+          echo "=== git status after add ==="
+          git status
           git diff --staged --quiet || git commit -m "Auto update [skip ci] - $(TZ='America/New_York' date '+%Y-%m-%d %I:%M %p ET')"
+          echo "=== git log ==="
+          git log --oneline -3
           git fetch origin main
-          git checkout -- .
-          git clean -fd
           git rebase origin/main
           git push
