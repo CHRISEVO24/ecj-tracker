@@ -46,6 +46,9 @@ jobs:
           git add history.json latest.json 2>/dev/null || true
           git diff --staged --quiet || git commit -m "Auto update [skip ci] - $(TZ='America/New_York' date '+%Y-%m-%d %I:%M %p ET')"
           git fetch origin main
-          git rebase -X ours origin/main
+          git reset HEAD -- .
+          git checkout -- .
+          git clean -fd
+          git rebase origin/main
           git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}
           git push
