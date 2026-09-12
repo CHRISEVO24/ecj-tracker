@@ -115,8 +115,14 @@ async function main() {
   }
 
   // Track existing SKUs to detect new items (must be after history is loaded)
+  // Build set of known product SKUs from all historical snapshots
   const existingSkus = new Set();
-  Object.values(history).forEach(snap => Object.keys(snap).forEach(k => existingSkus.add(k)));
+  Object.values(history).forEach(snap => {
+    Object.values(snap).forEach(item => {
+      if (item && item.sku) existingSkus.add(item.sku);
+      if (item && item.id)  existingSkus.add(String(item.id));
+    });
+  });
   console.log('Existing SKUs:', existingSkus.size);
 
   // Fetch all products
